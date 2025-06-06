@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteador Mega Sena</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .numbers-container {
+            margin: 30px 0;
+            min-height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .number-ball {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #3498db, #2980b9);
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0 8px;
+            box-shadow: 0 8px 16px rgba(52, 152, 219, 0.3);
+            animation: bounce 0.6s ease-out;
+            transform: scale(0);
+        }
+
+        @keyframes bounce {
+            0% { transform: scale(0) rotate(180deg); }
+            50% { transform: scale(1.2) rotate(90deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .generate-btn {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(231, 76, 60, 0.3);
+            margin: 20px 0;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(231, 76, 60, 0.4);
+        }
+
+        .generate-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .info {
+            background: rgba(52, 152, 219, 0.1);
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            text-align: left;
+        }
+
+        .info p {
+            margin: 5px 0;
+            color: #2c3e50;
+        }
+
+        .history {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .history h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .history-item {
+            background: rgba(149, 165, 166, 0.1);
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+
+        .clear-btn {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .clear-btn:hover {
+            background: #7f8c8d;
+        }
+
+        .preferred-numbers {
+            background: rgba(46, 204, 113, 0.1);
+            border-left: 4px solid #2ecc71;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+
+        .input-group {
+            margin-top: 15px;
+        }
+
+        #preferredInput {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #bdc3c7;
+            border-radius: 25px;
+            font-size: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        #preferredInput:focus {
+            outline: none;
+            border-color: #2ecc71;
+            box-shadow: 0 0 10px rgba(46, 204, 113, 0.3);
+            transform: scale(1.02);
+        }
+
+        .input-info {
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        .input-info small {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .error-message {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid #e74c3c;
+            color: #c0392b;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .number-ball {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+                margin: 0 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎰 Mega Sena</h1>
+        <p class="subtitle">Gerador de números da sorte</p>
+        
+        <div class="preferred-numbers">
+            <h3 style="color: #2c3e50; margin-bottom: 15px;">💝 Números Preferidos (Opcional)</h3>
+            <div class="input-group">
+                <input type="text" id="preferredInput" placeholder="Ex: 7, 13, 25 (separados por vírgula)" maxlength="50">
+                <div class="input-info">
+                    <small>Digite até 5 números entre 1 e 60. O sistema completará os restantes automaticamente.</small>
+                </div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+        </div>
+
+        <div class="numbers-container" id="numbersContainer">
+            <p style="color: #7f8c8d; font-size: 1.1rem;">Clique no botão para sortear seus números!</p>
+        </div>
+        
+        <button class="generate-btn" onclick="generateNumbers()" id="generateBtn">
+            🎲 Sortear Números
+        </button>
+        
+        <div class="info">
+            <p><strong>ℹ️ Como funciona:</strong></p>
+            <p>• São sorteados 6 números únicos entre 1 e 60</p>
+            <p>• Você pode escolher até 5 números preferidos</p>
+            <p>• Os números preferidos aparecem em verde 💚</p>
+            <p>• O sistema completa com números aleatórios</p>
+            <p>• Histórico dos últimos 5 sorteios</p>
+        </div>
+        
+        <div class="history" id="historySection" style="display: none;">
+            <h3>📋 Últimos Sorteios</h3>
+            <div id="historyList"></div>
+            <button class="clear-btn" onclick="clearHistory()">🗑️ Limpar Histórico</button>
+        </div>
+    </div>
+
+    <script>
+        let history = [];
+        let isGenerating = false;
+
+        function generateNumbers() {
+            if (isGenerating) return;
+            
+            // Limpar mensagem de erro anterior
+            hideError();
+            
+            isGenerating = true;
+            const btn = document.getElementById('generateBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Sorteando...';
+            
+            // Processar números preferidos
+            const preferredNumbers = getPreferredNumbers();
+            if (preferredNumbers === null) {
+                // Erro na validação, resetar botão
+                btn.disabled = false;
+                btn.textContent = '🎲 Sortear Números';
+                isGenerating = false;
+                return;
+            }
+            
+            // Gerar números restantes
+            const allNumbers = new Set(preferredNumbers);
+            while (allNumbers.size < 6) {
+                allNumbers.add(Math.floor(Math.random() * 60) + 1);
+            }
+            
+            // Converter para array e ordenar
+            const sortedNumbers = Array.from(allNumbers).sort((a, b) => a - b);
+            
+            // Simular delay para aumentar suspense
+            setTimeout(() => {
+                displayNumbers(sortedNumbers, preferredNumbers);
+                addToHistory(sortedNumbers, preferredNumbers);
+                
+                btn.disabled = false;
+                btn.textContent = '🎲 Sortear Novamente';
+                isGenerating = false;
+            }, 1500);
+        }
+
+        function getPreferredNumbers() {
+            const input = document.getElementById('preferredInput').value.trim();
+            
+            if (!input) {
+                return []; // Sem números preferidos
+            }
+            
+            try {
+                const numbers = input.split(',')
+                    .map(n => n.trim())
+                    .filter(n => n !== '')
+                    .map(n => parseInt(n));
+                
+                // Validações
+                if (numbers.some(n => isNaN(n))) {
+                    showError('Por favor, digite apenas números válidos separados por vírgula.');
+                    return null;
+                }
+                
+                if (numbers.some(n => n < 1 || n > 60)) {
+                    showError('Todos os números devem estar entre 1 e 60.');
+                    return null;
+                }
+                
+                if (numbers.length > 5) {
+                    showError('Você pode escolher no máximo 5 números preferidos.');
+                    return null;
+                }
+                
+                // Verificar números duplicados
+                const uniqueNumbers = [...new Set(numbers)];
+                if (uniqueNumbers.length !== numbers.length) {
+                    showError('Números duplicados encontrados. Cada número deve ser único.');
+                    return null;
+                }
+                
+                return uniqueNumbers;
+                
+            } catch (error) {
+                showError('Formato inválido. Use números separados por vírgula (ex: 7, 13, 25).');
+                return null;
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.style.display = 'none';
+        }
+
+        function displayNumbers(numbers, preferredNumbers = []) {
+            const container = document.getElementById('numbersContainer');
+            container.innerHTML = '';
+            
+            numbers.forEach((number, index) => {
+                setTimeout(() => {
+                    const ball = document.createElement('div');
+                    ball.className = 'number-ball';
+                    
+                    // Destacar números preferidos com cor diferente
+                    if (preferredNumbers.includes(number)) {
+                        ball.style.background = 'linear-gradient(145deg, #2ecc71, #27ae60)';
+                        ball.style.boxShadow = '0 8px 16px rgba(46, 204, 113, 0.4)';
+                        ball.title = 'Número preferido';
+                    }
+                    
+                    ball.textContent = number.toString().padStart(2, '0');
+                    ball.style.animationDelay = `${index * 0.1}s`;
+                    container.appendChild(ball);
+                }, index * 200);
+            });
+        }
+
+        function addToHistory(numbers, preferredNumbers = []) {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            const dateString = now.toLocaleDateString('pt-BR');
+            
+            history.unshift({
+                numbers: numbers,
+                preferredNumbers: preferredNumbers,
+                time: `${dateString} às ${timeString}`
+            });
+            
+            // Manter apenas os últimos 5 sorteios
+            if (history.length > 5) {
+                history.pop();
+            }
+            
+            updateHistoryDisplay();
+        }
+
+        function updateHistoryDisplay() {
+            const historySection = document.getElementById('historySection');
+            const historyList = document.getElementById('historyList');
+            
+            if (history.length === 0) {
+                historySection.style.display = 'none';
+                return;
+            }
+            
+            historySection.style.display = 'block';
+            historyList.innerHTML = '';
+            
+            history.forEach((entry, index) => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                
+                const numbersHtml = entry.numbers.map(n => {
+                    const isPreferred = entry.preferredNumbers && entry.preferredNumbers.includes(n);
+                    const style = isPreferred ? 'color: #2ecc71; font-weight: bold;' : '';
+                    const title = isPreferred ? ' title="Número preferido"' : '';
+                    return `<span style="${style}"${title}>${n.toString().padStart(2, '0')}</span>`;
+                }).join(' - ');
+                
+                const preferredInfo = entry.preferredNumbers && entry.preferredNumbers.length > 0 
+                    ? ` <small style="color: #2ecc71;">(${entry.preferredNumbers.length} preferido${entry.preferredNumbers.length > 1 ? 's' : ''})</small>` 
+                    : '';
+                
+                item.innerHTML = `
+                    <strong>Sorteio ${history.length - index}:</strong> 
+                    ${numbersHtml}${preferredInfo}
+                    <small style="color: #7f8c8d;">(${entry.time})</small>
+                `;
+                historyList.appendChild(item);
+            });
+        }
+
+        function clearHistory() {
+            history = [];
+            updateHistoryDisplay();
+        }
+
+        // Adicionar efeito de partículas quando sortear
+        function createConfetti() {
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.style.position = 'fixed';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.top = '-10px';
+                    confetti.style.width = '10px';
+                    confetti.style.height = '10px';
+                    confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 60%)`;
+                    confetti.style.pointerEvents = 'none';
+                    confetti.style.borderRadius = '50%';
+                    confetti.style.animation = 'fall 3s linear forwards';
+                    
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 3000);
+                }, i * 50);
+            }
+        }
+
+        // Adicionar CSS para animação de confetti
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fall {
+                to {
+                    transform: translateY(100vh) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
