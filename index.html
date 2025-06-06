@@ -207,6 +207,74 @@
             display: none;
         }
 
+        .current-result {
+            background: rgba(155, 89, 182, 0.1);
+            border-left: 4px solid #9b59b6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .result-display {
+            margin: 15px 0;
+        }
+
+        .result-numbers {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .result-ball {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #3498db, #2980b9);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+        }
+
+        .result-ball.preferred {
+            background: linear-gradient(145deg, #2ecc71, #27ae60);
+            box-shadow: 0 4px 8px rgba(46, 204, 113, 0.3);
+        }
+
+        .result-info {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .copy-btn {
+            background: linear-gradient(145deg, #9b59b6, #8e44ad);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 12px rgba(155, 89, 182, 0.3);
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(155, 89, 182, 0.4);
+        }
+
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+
         @media (max-width: 600px) {
             .container {
                 padding: 20px;
@@ -248,6 +316,17 @@
         <button class="generate-btn" onclick="generateNumbers()" id="generateBtn">
             🎲 Sortear Números
         </button>
+
+        <div class="current-result" id="currentResult" style="display: none;">
+            <h3 style="color: #2c3e50; margin-bottom: 15px;">🎯 Números Sorteados</h3>
+            <div class="result-display" id="resultDisplay">
+                <div class="result-numbers" id="resultNumbers"></div>
+                <div class="result-info" id="resultInfo"></div>
+            </div>
+            <button class="copy-btn" onclick="copyNumbers()" id="copyBtn">
+                📋 Copiar Números
+            </button>
+        </div>
         
         <div class="info">
             <p><strong>ℹ️ Como funciona:</strong></p>
@@ -268,6 +347,8 @@
     <script>
         let history = [];
         let isGenerating = false;
+        let currentNumbers = [];
+        let currentPreferred = [];
 
         function generateNumbers() {
             if (isGenerating) return;
@@ -302,6 +383,7 @@
             // Simular delay para aumentar suspense
             setTimeout(() => {
                 displayNumbers(sortedNumbers, preferredNumbers);
+                showCurrentResult(sortedNumbers, preferredNumbers);
                 addToHistory(sortedNumbers, preferredNumbers);
                 
                 btn.disabled = false;
@@ -388,6 +470,78 @@
             });
         }
 
+        function showCurrentResult(numbers, preferredNumbers = []) {
+            currentNumbers = numbers;
+            currentPreferred = preferredNumbers;
+            
+            const resultSection = document.getElementById('currentResult');
+            const resultNumbers = document.getElementById('resultNumbers');
+            const resultInfo = document.getElementById('resultInfo');
+            
+            // Mostrar seção
+            resultSection.style.display = 'block';
+            
+            // Limpar e criar bolas dos números
+            resultNumbers.innerHTML = '';
+            numbers.forEach(number => {
+                const ball = document.createElement('div');
+                ball.className = 'result-ball';
+                
+                if (preferredNumbers.includes(number)) {
+                    ball.classList.add('preferred');
+                    ball.title = 'Número preferido';
+                }
+                
+                ball.textContent = number.toString().padStart(2, '0');
+                resultNumbers.appendChild(ball);
+            });
+            
+            // Mostrar informações
+            let infoText = `Sorteio realizado às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+            if (preferredNumbers.length > 0) {
+                infoText += ` • ${preferredNumbers.length} número${preferredNumbers.length > 1 ? 's' : ''} preferido${preferredNumbers.length > 1 ? 's' : ''} incluído${preferredNumbers.length > 1 ? 's' : ''}`;
+            }
+            resultInfo.textContent = infoText;
+        }
+
+        function copyNumbers() {
+            if (currentNumbers.length === 0) return;
+            
+            const numbersText = currentNumbers.map(n => n.toString().padStart(2, '0')).join(' - ');
+            const preferredText = currentPreferred.length > 0 ? ` (${currentPreferred.length} preferido${currentPreferred.length > 1 ? 's' : ''})` : '';
+            const fullText = `Mega Sena: ${numbersText}${preferredText}`;
+            
+            navigator.clipboard.writeText(fullText).then(() => {
+                const btn = document.getElementById('copyBtn');
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copiado!';
+                btn.style.background = 'linear-gradient(145deg, #2ecc71, #27ae60)';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = 'linear-gradient(145deg, #9b59b6, #8e44ad)';
+                }, 2000);
+            }).catch(() => {
+                // Fallback para navegadores que não suportam clipboard API
+                const textArea = document.createElement('textarea');
+                textArea.value = fullText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                const btn = document.getElementById('copyBtn');
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copiado!';
+                btn.style.background = 'linear-gradient(145deg, #2ecc71, #27ae60)';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = 'linear-gradient(145deg, #9b59b6, #8e44ad)';
+                }, 2000);
+            });
+        }
+
         function addToHistory(numbers, preferredNumbers = []) {
             const now = new Date();
             const timeString = now.toLocaleTimeString('pt-BR', { 
@@ -449,6 +603,12 @@
         function clearHistory() {
             history = [];
             updateHistoryDisplay();
+            
+            // Limpar também o resultado atual
+            const resultSection = document.getElementById('currentResult');
+            resultSection.style.display = 'none';
+            currentNumbers = [];
+            currentPreferred = [];
         }
 
         // Adicionar efeito de partículas quando sortear
